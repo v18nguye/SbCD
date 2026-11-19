@@ -1,0 +1,16 @@
+_target_: sbcd.pl_modules.discrete_diffusion_w_site_symm.TimeCrystal
+time_dim: 256 
+latent_dim: 512
+max_neighbors: 20  # maximum number of neighbors for OTF graph bulding in decoder
+radius: 7.  # maximum search radius for OTF graph building in decoder
+timesteps: 1000
+ip: false
+use_ks: true
+use_gt_frac_coords: true
+use_site_symm: true
+prior: marginal
+
+defaults:
+  - decoder: cspnet_mp20
+  - beta_scheduler: cosine
+  - sigma_scheduler: wrapped

@@ -1,0 +1,114 @@
+root_path: ${oc.env:PROJECT_ROOT}/data/mpts_52
+prop: formation_energy_per_atom
+num_targets: 1
+# prop: scaled_lattice
+# num_targets: 6
+niggli: true
+primitive: False
+graph_method: crystalnn
+lattice_scale_method: scale_length
+preprocess_workers: 8
+readout: mean
+max_atoms: 52
+otf_graph: false
+eval_model_name: mp20
+tolerance: 0.1
+
+use_space_group: true
+use_asym_unit: true
+use_pos_index: false
+number_representatives: 0 # if set to 0, no dummy representatives are added
+use_random_representatives: false # irrelevant
+
+train_max_epochs: 2001
+early_stopping_patience: 100000
+teacher_forcing_max_epoch: 500
+
+eval_every_epoch: 100
+eval_generate_samples: 512
+
+use_atom_per_sg: False # atom type marginal dist per spacegroup(if False use marginal of all sgs).
+rate_const: 2.
+rate_function_name: const # jump rate type
+one_forward_pass: True
+
+cost_coord: 3.
+cost_lattice: 10
+cost_type: 1
+cost_symm: 1.
+cost_sg: 4.
+cost_rate: 1.
+
+datamodule:
+  _target_: sbcd.pl_data.datamodule.CrystDataModule
+  atom_marginals_path: ${data.root_path}/train_atom_types_marginals_vii+hm.pt 
+  ss_marginals_path: ${data.root_path}/train_site_symm_marginals_per_sg_vii+hm.pt
+  datasets:
+    train:
+      _target_: sbcd.pl_data.dataset.CrystDataset
+      name: Formation energy train
+      path: ${data.root_path}/train.csv
+      save_path: ${data.root_path}/train_ori_hm+ss.pt
+      prop: ${data.prop}
+      niggli: ${data.niggli}
+      primitive: ${data.primitive}
+      graph_method: ${data.graph_method}
+      tolerance: ${data.tolerance}
+      use_space_group: ${data.use_space_group}
+      use_pos_index: ${data.use_pos_index}
+      number_representatives: ${data.number_representatives}
+      use_random_representatives: ${data.use_random_representatives}
+      use_asym_unit: ${data.use_asym_unit}
+      lattice_scale_method: ${data.lattice_scale_method}
+      preprocess_workers: ${data.preprocess_workers}
+      gt_prop_eval_path:  ${data.root_path}/train_${data.eval_model_name}_${data.prop}.pt
+      sg_info_path: ${data.root_path}/sg_info.pt
+    val:
+      - _target_: sbcd.pl_data.dataset.CrystDataset
+        name: Formation energy val
+        path: ${data.root_path}/val.csv
+        gt_crys_path: ${data.root_path}/val_gt_crys.pt
+        save_path: ${data.root_path}/val_ori_hm+ss.pt
+        prop: ${data.prop}
+        niggli: ${data.niggli}
+        primitive: ${data.primitive}
+        graph_method: ${data.graph_method}
+        tolerance: ${data.tolerance}
+        use_space_group: ${data.use_space_group}
+        use_pos_index: ${data.use_pos_index}
+        number_representatives: ${data.number_representatives}
+        use_random_representatives: ${data.use_random_representatives}
+        use_asym_unit: ${data.use_asym_unit}
+        lattice_scale_method: ${data.lattice_scale_method}
+        preprocess_workers: ${data.preprocess_workers}
+        gt_prop_eval_path:  ${data.root_path}/val_${data.eval_model_name}_${data.prop}.pt
+
+    test:
+      - _target_: sbcd.pl_data.dataset.CrystDataset
+        name: Formation energy test
+        path: ${data.root_path}/test.csv
+        gt_crys_path: ${data.root_path}/test_gt_crys.pt
+        save_path: ${data.root_path}/test_ori_hm+ss.pt
+        prop: ${data.prop}
+        niggli: ${data.niggli}
+        primitive: ${data.primitive}
+        graph_method: ${data.graph_method}
+        tolerance: ${data.tolerance}
+        use_space_group: ${data.use_space_group}
+        use_pos_index: ${data.use_pos_index}
+        number_representatives: ${data.number_representatives}
+        use_random_representatives: ${data.use_random_representatives}
+        use_asym_unit: ${data.use_asym_unit}
+        lattice_scale_method: ${data.lattice_scale_method}
+        preprocess_workers: ${data.preprocess_workers}
+        gt_prop_eval_path:  ${data.root_path}/test_${data.eval_model_name}_${data.prop}.pt
+
+  num_workers:
+    train: 0
+    val: 0
+    test: 0
+
+  batch_size:
+    train: 256
+    val: 256
+    test: 256
